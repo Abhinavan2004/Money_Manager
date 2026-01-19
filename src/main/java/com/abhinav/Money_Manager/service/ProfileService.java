@@ -14,10 +14,16 @@ public class ProfileService {
 
     private final ProfileRepository profileRepository;
 
+    private EmailService emailService ;
+
     public ProfileDTO registerProfile(ProfileDTO profileDTO){
         ProfileEntity newprofile = toEntity(profileDTO);
         newprofile.setActivationToken(UUID.randomUUID().toString());
         newprofile =  profileRepository.save(newprofile);
+        String activationLink = "http://localhost:8091/activate?token=" + newprofile.getActivationToken();
+        String sub = "Account Verification & Activation Email" ;
+        String message = "Click on the below activation link for successfully activation of your account" ;
+        emailService.sendEmail(newprofile.getEmail() , sub , message);
         return toDTO(newprofile);
     }
 
