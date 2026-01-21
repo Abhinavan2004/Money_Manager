@@ -16,8 +16,11 @@ public class ProfileService {
 
     private final EmailService emailService ;
 
+    // to register a new account on the platform
     public ProfileDTO registerProfile(ProfileDTO profileDTO){
         ProfileEntity newprofile = toEntity(profileDTO);
+
+       // to create a activation token and link for email service
         newprofile.setActivationToken(UUID.randomUUID().toString());
         newprofile =  profileRepository.save(newprofile);
         String activationLink = "http://localhost:8091/activate?token=" + newprofile.getActivationToken();
@@ -46,5 +49,15 @@ public class ProfileService {
                 .createdAt(profileEntity.getCreatedAt())
                 .updatedAt(profileEntity.getUpdatedAt())
                 .build();
+    }
+
+    public boolean activateProfile(String activationToken){
+        return profileRepository.findByActivationToken(activationToken)
+                .map(profile -> {
+                    profile.setIsActive(true);
+                    profileRepository.save(profile);
+                    return true ;
+                })
+                .orElse(false);
     }
 }
