@@ -4,6 +4,7 @@ import com.abhinav.Money_Manager.dto.ProfileDTO;
 import com.abhinav.Money_Manager.entity.ProfileEntity;
 import com.abhinav.Money_Manager.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -13,7 +14,7 @@ import java.util.UUID;
 public class ProfileService {
 
     private final ProfileRepository profileRepository;
-
+    private final PasswordEncoder passwordEncoder;
     private final EmailService emailService ;
 
     // to register a new account on the platform
@@ -35,7 +36,7 @@ public class ProfileService {
                 .id(profileDTO.getId())
                 .fullName(profileDTO.getFullName())
                 .email(profileDTO.getEmail())
-                .password(profileDTO.getPassword())
+                .password(passwordEncoder.encode(profileDTO.getPassword()))
                 .createdAt(profileDTO.getCreatedAt())
                 .updatedAt(profileDTO.getUpdatedAt())
                 .build();
