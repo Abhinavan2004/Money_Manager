@@ -4,9 +4,13 @@ import com.abhinav.Money_Manager.dto.ProfileDTO;
 import com.abhinav.Money_Manager.entity.ProfileEntity;
 import com.abhinav.Money_Manager.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.net.Authenticator;
 import java.util.UUID;
 
 @Service
@@ -60,5 +64,37 @@ public class ProfileService {
                     return true ;
                 })
                 .orElse(false);
+    }
+
+
+    public boolean isAccountActive(String email){
+        return profileRepository.findByEmail(email)
+                .map(ProfileEntity::getIsActive)
+                .orElse(false);
+    }
+
+    public ProfileEntity getCurrentProfile(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return profileRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Profile Not Found with email : " + authentication.getName()));
+    }
+
+    public ProfileDTO getCurrentProfileDTO(String email){
+        ProfileEntity currentUSer = null ;
+        if(email == null){
+            currentUSer = getCurrentProfile();
+        }
+        else{
+            profileRepository.findByEmail(email)
+                    .orElseThrow(() -> new UsernameNotFoundException("Profile Not Found with email : " + email));
+        }
+        return ProfileDTO.builder()
+                .id(currentUSer.getId())
+                .fullName(currentUSer.getFullName())
+                .email(currentUSer.getEmail())
+                .profileImageUrl(currentUSer.getProfileImageUrl())
+                .createdAt(currentUSer.getCreatedAt())
+                .updatedAt(currentUSer.getUpdatedAt())
+                .build();
     }
 }
